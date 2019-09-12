@@ -47,3 +47,39 @@ X <- matrix(rnorm(n*p),ncol=4,nrow=n)
 Y <- matrix(rnorm(n*q),ncol=3,nrow=n)
 res <- crossprod(X,Y)
 res
+
+library(doSNOW)
+cl <- makeCluster(4)
+registerDoSNOW(cl)
+res.cpc <- cpc(X,Y,ng=10)
+stopCluster(cl)
+res.cpc
+
+##7.3
+dataX <- attach.big.matrix(dget("Xda.desc"))
+Xdes <- describe(dataX)
+Xdes
+
+dim(dataX)
+
+XtX.big <- function(X.des, ng = 1) {
+  readchunk <- function(X, g, size.chunk) {
+    rows <- ((g - 1) * size.chunk + 1):(g * size.chunk)
+    chunk <- X[rows,]
+  }
+  res <- foreach(g = 1:ng, .packages = c("bigmemory"), .combine = "+") %dopar% {
+    X <- attach.big.matrix(X.des)
+    size.chunk <- nrow(X) / ng
+    chunk.X <- readchunk(X, g, size.chunk)
+    term <- t(chunk.X) %*% chunk.X
+  }
+  return(res)
+}
+
+library(doSNOW)
+cl <- makeCluster(4)
+registerDoSNOW(cl)
+cl <- makeCluster(4)
+res.big <- XtX.big(Xdes,ng=10)
+stopCluster(cl)
+summary(res.big[,101])
