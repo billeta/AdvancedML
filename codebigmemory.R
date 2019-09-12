@@ -1,5 +1,7 @@
 #We load the library
 library(bigmemory)
+library(biglm)
+library(biganalytics)
 
 #Create the bin and desc file
 #x <- read.big.matrix("Netflix.txt", sep = ",", type = "integer",
@@ -33,3 +35,7 @@ dataX[these, ]
 mnames <- read.csv("movie_titles.csv", header = FALSE)
 names(mnames) <- c("movie", "year", "Name of Movie")
 mnames[mnames[, 1] %in% unique(dataX[these, 1]), c(1, 3)]
+
+#We'll try to run a bigglm on the netflix dataset
+model = biglm.big.matrix(rating ~ year, data = dataX, fc = "year")
+print(summary(model)$mat)
