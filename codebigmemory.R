@@ -17,4 +17,8 @@ dataX[1:3,1:4]
 #check the dim
 dim(dataX)
 
+#Summary of the four columns
 summary(dataX[,1:4])
+
+#Range of column 1
+range(dataX[,1])
