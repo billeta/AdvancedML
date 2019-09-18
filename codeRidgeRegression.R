@@ -16,3 +16,8 @@ summary(mod)
 #Let's try the ridge regression
 library(MASS)
 lm.ridge(y~matX-1,lambda=0.1) #The -1 mean that we try to explain y without an intercept
+
+#we can do it with glmnet library as well
+library(glmnet)
+model <- glmnet(matX,y,alpha=0,lambda = 0.1) #lambda is the tuning parameter and we want to find the best one (use cross validation)
+as.vector(model$beta)
