@@ -58,11 +58,28 @@ plot(tune)
 
 #performing ridge regretion using the best value of beta
 ridge <- glmnet(X,y,lambda=tune$lambda.1se,alpha=0)
-#looking at our new parameters
-head(ridge$beta)
 
 #Checking how many parameters are relevant (>0.003)
 length(which(abs(ridge$beta[,1])>0.003))
 
 #Computing the MSEP
 mean((predict(ridge,newx = X)-y)**2)
+
+#looking at our new parameters
+head(ridge$beta)
+
+
+######Lasso Regression#####
+#We try to compute the best beta iwh the cross validation
+tune.lasso <- cv.glmnet(X,y,alpha=1)
+plot(tune.lasso)
+
+#We can then run a Lasso regression
+lasso <- glmnet(X,y,lambda=tune.lasso$lambda.1se,alpha=1)
+
+#We can then see which genes will be selected by the Lasso model
+colnames(X)[nonzeroCoef(lasso$beta)]
+#As we can see we've reduce the number of genes to 51
+
+#Let's finish by computing the MSEP
+mean((predict(lasso,newx = X)-y)**2)
