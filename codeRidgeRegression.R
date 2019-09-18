@@ -145,3 +145,30 @@ tune.elastic$alpha
 
 #(in this cas we should take a alpha equal to 1, leading to perform a lasso model) <- right if the minimum cvloss value is obtain at alpha = 1
 #In this cas not, it will be something like 0.5
+
+#####Section 7#####
+
+#Loading the dataset
+load("Data.RData")
+
+#we get the dimension of the data
+dim(X)
+
+#Checking the response variable
+length(y)
+
+#cross validated the lambda using the lasso model
+tune.lasso <- cv.glmnet(X,y,alpha=1)
+plot(tune.lasso)
+
+#run a lasso model with the best value of lambda
+lasso <- glmnet(X,y,lambda=tune.lasso$lambda.min,alpha=1)
+colnames(X)[nonzeroCoef(lasso$beta)]
+#According to the MSE computed by cross-validation, no SNPs has been selected to predict
+#the outcome.
+
+#loading the dependency
+library(ncvreg)
+fit <- ncvreg(X, y, penalty="lasso",returnX=FALSE)
+obj <- mfdr(fit)
+plot(obj)
