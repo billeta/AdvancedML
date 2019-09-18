@@ -46,7 +46,6 @@ lm(y~x1+x2)$coef
 lm.ridge(y~x1+x2,lambda=1)
 #!!!!! Careful correlated data give back bad estimator the x1 and x2 harshly different!
 
-
 #lets try with the breath cancer dataset
 load("bcTCGA.RData")
 #Checking the dim of the dataset
@@ -68,8 +67,8 @@ mean((predict(ridge,newx = X)-y)**2)
 #looking at our new parameters
 head(ridge$beta)
 
-
 ######Lasso Regression#####
+
 #We try to compute the best beta iwh the cross validation
 tune.lasso <- cv.glmnet(X,y,alpha=1)
 plot(tune.lasso)
@@ -83,3 +82,66 @@ colnames(X)[nonzeroCoef(lasso$beta)]
 
 #Let's finish by computing the MSEP
 mean((predict(lasso,newx = X)-y)**2)
+#this is higher than the ridge but be careful!!! because the ridge regression is probably overfitted
+
+#####Big lasso#####
+library(biglasso)
+
+#We load a dataset from the library
+data("colon")
+
+#We want to understand 
+?colon
+
+#Getting the X (gene expression)
+X <- colon$X
+
+#the array that will be fixed
+X <- unique(X, MARGIN = 2)
+
+#The y variable is store (binary variable)
+y <- colon$y
+
+#Checking the dim of our dataset
+dim(X)
+
+#looking at the type of the y variable
+class(y)
+
+#n is the number of y variable
+n <- length(y)
+
+#We use cross-validation to find the optimal lambda
+set.seed(1)
+tune.lasso <- cv.glmnet(X,y,alpha=1,family="binomial") #we put binomial because we have a binary response variable
+plot(tune.lasso)
+
+#loading inference package
+library(selectiveInference)
+
+#We take all of the beta
+beta <- coef.glmnet(tune.lasso, s=tune.lasso$lambda.1se)
+
+#We can look at the predictor and see which one can be a good predictor
+out <- fixedLassoInf(X,y,beta,tune.lasso$lambda.1se,family="binomial")
+out
+#The gene located at the 368 and 756 can probably be good predictor, 243 as well etc...
+
+#####Elastic Net#####
+
+#Loading the dependencies
+library(glmnetUtils)
+
+#We look for the best parameters (minimum cross validation error with different value of alpha)
+tune.elastic <- cva.glmnet(X,y)
+
+#Let's check the result
+plot(tune.elastic)
+
+#We can look at the best alpha
+minlossplot(tune.elastic,type="l")
+
+tune.elastic$alpha
+
+#(in this cas we should take a alpha equal to 1, leading to perform a lasso model) <- right if the minimum cvloss value is obtain at alpha = 1
+#In this cas not, it will be something like 0.5
