@@ -103,3 +103,37 @@ AUC(preds, y01[ind.test])
 ?AUC
 
 
+#####Part6#####
+
+#Creating a big matrix
+X <- FBM(13, 17, init = rnorm(221))
+X
+## A Filebacked Big Matrix of type 'double' with 13 rows and 17 columns.
+
+#We compare the two crossprod function
+K <- big_crossprodSelf(X, fun.scaling = big_scale(center = FALSE))
+class(K)
+
+dim(K)
+
+K$backingfile
+XtX <- crossprod(X[])
+all.equal(K[], XtX)
+
+#Look at how to compute the correlation of a filebacked big matrix
+X <- FBM(13, 17, init = rnorm(221))
+# Comparing with cor
+K <- big_cor(X)
+class(K)
+dim(K)
+K$backingfile
+
+true <- cor(X[])
+all.equal(K[], true)
+n <- nrow(X)
+ind <- sort(sample(n, n/2))
+K2 <- big_cor(X, ind.row = ind)
+true2 <- cor(X[ind, ])
+all.equal(K2[], true2)
+#Basically we are comparing the function with the usual one and we get that it compute exactly in the same way
+#It can do the same on the divide and combine method (see end of part 6 in the bigstatr module's material)
